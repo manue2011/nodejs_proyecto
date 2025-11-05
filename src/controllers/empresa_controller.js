@@ -1,17 +1,24 @@
-import { pool } from "../db.js"
+import { pool } from "../db.js";
 
+// Log global para errores no capturados
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+});
+
+// Obtener todas las empresas
 export let getempresas = async (req, res) => {
   try {
     let [rows] = await pool.query("SELECT * FROM empresa");
     res.json(rows);
   } catch (error) {
-    console.error(error); // Log error en Railway
+    console.error(error); // Log de error
     return res.status(500).json({
       message: "algo salio mal"
     });
   }
 }
 
+// Obtener una empresa por ID
 export let getempresa = async (req, res) => {
   try {
     let [rows] = await pool.query("SELECT * FROM empresa WHERE id_empresa = ?", [req.params.id_empresa]);
@@ -27,11 +34,12 @@ export let getempresa = async (req, res) => {
   }
 }
 
+// Crear una empresa
 export let createempresas = async (req, res) => {
   try {
     let { id_empresa, nombre, direcccion, pais, ingrsos_anuales } = req.body;
     let [rows] = await pool.query(
-      "INSERT INTO empresa (id_empresa, nombre, direcccion, pais, ingrsos_anuales) VALUES (?,?,?,?,?)",
+      "INSERT INTO empresa (id_empresa, nombre, direcccion, pais, ingrsos_anuales) VALUES (?, ?, ?, ?, ?)",
       [id_empresa, nombre, direcccion, pais, ingrsos_anuales]
     );
     res.send({
@@ -50,6 +58,7 @@ export let createempresas = async (req, res) => {
   }
 }
 
+// Actualizar una empresa
 export let updateempresas = async (req, res) => {
   try {
     let { id_empresa } = req.params;
@@ -62,7 +71,6 @@ export let updateempresas = async (req, res) => {
     if (result.affectedRows === 0) return res.status(404).json({
       message: "empresa no encontrada"
     });
-
     let [rows] = await pool.query("SELECT * FROM empresa WHERE id_empresa = ?", [id_empresa]);
     res.json(rows[0]);
   } catch (error) {
@@ -73,6 +81,7 @@ export let updateempresas = async (req, res) => {
   }
 }
 
+// Eliminar una empresa
 export let deleteempresas = async (req, res) => {
   try {
     let [result] = await pool.query(
